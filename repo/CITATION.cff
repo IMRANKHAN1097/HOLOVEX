@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use these consoles, please cite them as below."
+title: "HOLOVEX: Research & Innovation Lab — interactive digital holography and computational imaging consoles"
+type: software
+authors:
+  - family-names: Khan
+    given-names: Imran
+repository-code: "https://github.com/IMRANKHAN1097/holovex-lab"
+license: MIT
+abstract: "HOLOVEX research website containing interactive digital holography consoles, computational holography demonstrations, and the HVX-001 project brief."
+keywords: [digital holography, computational holography, spray metrology, Fresnel propagation, angular spectrum]

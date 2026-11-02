@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spray droplet holography console · Project 2 (second project)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.32.0/plotly.min.js"></script>
+<style>/*__CSS__*/
+#plot,#hist{width:100%;height:calc(100vh - 120px);min-height:420px}@media(max-width:800px){#plot,#hist{height:60vh}}</style></head><body><div class="wrap">
+<div class="side">
+<h1>Spray droplet console</h1><div class="sub">Second project · off-axis Mach–Zehnder, 532 nm, Photron FASTCAM SA-Z · CSIR-CSIO<br>Dataset loaded: <b id="nN"></b> droplet detections</div>
+<div class="card"><h2>Filters</h2><label>Diameter range (mm)</label><div class="row"><span id="dlo"></span><span id="dhi"></span></div><input type="range" id="dMin" step="0.001"><input type="range" id="dMax" step="0.001">
+<label>Frame range</label><div class="row"><span id="flo"></span><span id="fhi"></span></div><input type="range" id="fMin" step="1"><input type="range" id="fMax" step="1">
+<label>Colour by</label><select id="colorBy"><option value="Deq_mm">Diameter (mm)</option><option value="sphericity">Sphericity</option><option value="frame">Frame</option><option value="orientation_deg">Orientation (°)</option></select>
+<label>Marker size</label><input type="range" id="msz" min="2" max="14" value="6">
+<div class="two"><button id="play">▶ Play frames</button><button id="reset">Reset</button></div>
+<div class="two"><button onclick="setView('iso')">Isometric</button><button onclick="setView('top')">Top (x–y)</button></div><div class="two"><button onclick="setView('side')">Side (x–z)</button><button id="csv">Download CSV</button></div></div>
+<div class="card"><h2>Statistics, current selection</h2><div class="sg" id="stats"></div></div>
+<div class="card"><h2>Data quality</h2><div class="hint" id="dq"></div></div>
+</div>
+<div class="main"><div class="tabs" id="tabs"></div>
+<div class="pane on" id="p0"><div class="hero"><span class="chip a"><b>1,517</b> droplets</span><span class="chip b"><b>17</b> frames</span><span class="chip c">depth is an artefact: <b>z = 50 mm</b></span></div><div id="plot"></div></div>
+<div class="pane" id="p1"><div id="hist"></div></div>
+<div class="pane" id="p2">
+<div class="warn"><b>Different analysis.</b> The numbers on this tab are from the internship report (dataset “out put 2”: 178 frames, 8,000 fps, coarse band N = 28). The 3D cloud in the first tab comes from the file you loaded here. Confirm they are the same recording before presenting them together.</div>
+<table><tr><th>Quantity</th><th>Value</th><th>Source</th></tr>
+<tr><td>Frames processed / rejected</td><td>177 / 1 of 178</td><td>Table 6.2</td></tr><tr><td>Raw candidates → persistence-accepted</td><td>4,910 → 3,246 (66.1%)</td><td>§6.2</td></tr>
+<tr><td>Analysed coarse band</td><td>4.0088–6.3874 mm, N = 28</td><td>§6.2</td></tr><tr><td>D32 (bootstrap 95% CI)</td><td>4.5218 mm (4.3720–4.6672)</td><td>Table 6.3</td></tr>
+<tr><td>Dv50 / CV</td><td>4.4782 mm / 8.096%</td><td>Table 6.3</td></tr><tr><td>Rosin–Rammler</td><td>D̄ = 4.6660 mm, n = 13.02</td><td>Table 6.3</td></tr>
+<tr><td>Fringe visibility / SNR</td><td>0.99972 ± 0.00007 / −3.74 ± 1.25 dB</td><td>Table 6.2</td></tr><tr><td>Retained track speeds (3)</td><td>1.934 ± 1.487 m/s at 8,000 fps (in-plane)</td><td>§6.8</td></tr></table>
+<div id="bins" style="height:300px"></div></div>
+<div class="pane" id="p3"><h2>What happened, in plain words</h2><ol class="story"><li><b>Built on project one.</b> After the liquid-mixing work I applied the same idea to a spray of droplets.</li><li><b>Recorded the spray.</b> An off-axis Mach–Zehnder interferometer and a high-speed camera captured a sequence of holograms.</li><li><b>Refocused every frame.</b> The computer propagates each hologram to many depths, 50 to 600 mm, so droplets come into focus one by one.</li><li><b>Found the droplets.</b> Thresholding finds dark blobs, a sharpness score gives each one’s depth, and a persistence filter removes noise.</li><li><b>Measured the spray.</b> Sizes give D32 and size-distribution fits with confidence intervals; tracking gives speed. I also listed what is wrong, such as the scan-edge depth.</li></ol>
+<h2>Optical setup</h2>__SETUP__<p class="hint">Diagram redrawn for this console. Corrections to the report figure: “Objective beam” is now OBJECT beam, and the camera line labelled “VSB” is the synchronisation (sync) line.</p><h2>Processing pipeline</h2>__PIPE__</div>
+<div class="pane" id="p4"><h2>Reconstruction in four equations</h2>
+<div class="eq">I = |R + O|² = |R|² + |O|² + R*O + R O*</div><p>The camera records interference. The cross terms hold the object’s amplitude and phase. The first two terms are removed by mean subtraction.</p>
+<div class="eq">U(x,y,z) = F⁻¹ { F{U₀} · exp[ i k z √(1 − (λfₓ)² − (λf_y)²) ] }</div><p>Angular spectrum propagation to depth z. Evanescent components are set to zero and the Matsushima–Shimobaba band limit prevents aliasing. A depth stack is built from 50 to 600 mm in 5 mm steps.</p>
+<div class="eq">z_focus = argmax S(z),  S = Σ[(∂I/∂x)² + (∂I/∂y)²]</div><p>Tenengrad sharpness is evaluated inside each droplet’s bounding box.</p>
+<div class="eq">D32 = Σ Dᵢ³ / Σ Dᵢ² = 6 ΣVᵢ / ΣAᵢ</div><p>Sauter mean diameter, recomputed live for the selection in the sidebar.</p>
+<h2>Known limits</h2><ul><li>The loaded data has a single depth, z = 50 mm, for every droplet. This is a scan-edge artefact, not a physical result.</li><li>The processing script is inline (Gabor) while the recording geometry is off-axis, so only amplitude is recovered.</li><li>Sphericity above 1 is not physical; it signals segmentation bias.</li></ul></div>
+<div class="pane" id="p5"><h2>References</h2><ul>
+<li>Goodman, J. W. (2005). <i>Introduction to Fourier Optics</i>, 3rd ed.</li><li>Katz, J., Sheng, J. (2010). Applications of holography in fluid mechanics and particle dynamics. <i>Annu. Rev. Fluid Mech.</i> 42, 531–555.</li>
+<li>Matsushima, K., Shimobaba, T. (2009). Band-limited angular spectrum method. <i>Opt. Express</i> 17, 19662–19673.</li><li>Schnars, U., Jüptner, W. (1994). Direct recording of holograms by a CCD target and numerical reconstruction. <i>Appl. Opt.</i> 33, 179–181.</li>
+<li>Rosin, P., Rammler, E. (1933). <i>J. Inst. Fuel</i> 7, 29–36.</li><li>Takeda, M., Ina, H., Kobayashi, S. (1982). <i>J. Opt. Soc. Am.</i> 72, 156–160.</li><li>Kumar, M., Pensia, L., Kumar, R., Matoba, O. (2025). <i>IEEE Trans. Instrum. Meas.</i> 74, 5012510.</li></ul>
+<p class="hint">Reference details were copied from the internship reports; please confirm volume and page numbers against the publishers before citing.</p></div>
+</div></div>
+<script>
+const DATA=__DATA__;
+(function(){
+const $=id=>document.getElementById(id),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const frames=[...new Set(DATA.map(p=>p.frame))].sort((a,b)=>a-b),fMinV=frames[0],fMaxV=frames[frames.length-1];
+const allD=DATA.map(p=>p.Deq_mm),dLo=Math.floor(Math.min(...allD)*1000)/1000,dHi=Math.ceil(Math.max(...allD)*1000)/1000;
+$('nN').textContent=DATA.length+' ('+frames.length+' frames, '+fMinV+'–'+fMaxV+')';
+const names=['3D droplet cloud','Size distribution','Report results','What happened','Method','References'];
+names.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.className=i?'':'on';b.onclick=()=>show(i);$('tabs').appendChild(b)});
+function show(i){[...$('tabs').children].forEach((b,j)=>b.className=i===j?'on':'');for(let j=0;j<6;j++)$('p'+j).className='pane'+(i===j?' on':'');if(i<2)render();if(i===2)bins()}
+[['dMin',dLo],['dMax',dHi]].forEach(([id,v])=>{$(id).min=dLo;$(id).max=dHi;$(id).value=v});
+[['fMin',fMinV],['fMax',fMaxV]].forEach(([id,v])=>{$(id).min=fMinV;$(id).max=fMaxV;$(id).value=v});
+const mean=a=>a.reduce((s,v)=>s+v,0)/a.length,sd=a=>{const m=mean(a);return Math.sqrt(mean(a.map(v=>(v-m)**2)))};
+const q=(a,p)=>{a=[...a].sort((x,y)=>x-y);const k=(a.length-1)*p,b=Math.floor(k);return a[b+1]!==undefined?a[b]+(k-b)*(a[b+1]-a[b]):a[b]};
+function sel(){let lo=+$('dMin').value,hi=+$('dMax').value,f0=+$('fMin').value,f1=+$('fMax').value;if(lo>hi)[lo,hi]=[hi,lo];if(f0>f1)[f0,f1]=[f1,f0];
+$('dlo').textContent=lo.toFixed(2)+' mm';$('dhi').textContent=hi.toFixed(2)+' mm';$('flo').textContent='frame '+f0;$('fhi').textContent='frame '+f1;
+return DATA.filter(p=>p.Deq_mm>=lo&&p.Deq_mm<=hi&&p.frame>=f0&&p.frame<=f1)}
+function stats(s){const d=s.map(p=>p.Deq_mm),el=$('stats');if(!d.length){el.innerHTML='<div class="k">No droplets</div><div></div>';return}
+const sA=d.reduce((t,x)=>t+Math.PI*x*x,0),sV=d.reduce((t,x)=>t+Math.PI/6*x**3,0);
+const rows=[['N',d.length],['Mean D (mm)',mean(d).toFixed(3)],['Std dev (mm)',sd(d).toFixed(3)],['CV (%)',(100*sd(d)/mean(d)).toFixed(1)],['Dv10 / Dv50 / Dv90*',q(d,.1).toFixed(2)+' / '+q(d,.5).toFixed(2)+' / '+q(d,.9).toFixed(2)],['D32 (mm)',(6*sV/sA).toFixed(3)],['Mean sphericity',mean(s.map(p=>p.sphericity)).toFixed(3)]];
+el.innerHTML=rows.map(r=>`<div class="k">${r[0]}</div><div class="v">${r[1]}</div>`).join('')+'<div class="hint" style="grid-column:1/3">*count percentiles of Deq, not volume percentiles</div>'}
+$('dq').innerHTML='All '+DATA.length+' detections share z = '+[...new Set(DATA.map(p=>p.z_mm))].join(', ')+' mm. That is the scan-edge artefact described in the report, so depth is not a measurement here. '+DATA.filter(p=>p.sphericity>1).length+' detections have sphericity above 1 (not physical). The file header says 18 frames; '+frames.length+' contain accepted droplets.';
+const thm=()=>({paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:css('--fg')}});
+function render(){const s=sel(),key=$('colorBy').value,k=+$('msz').value;stats(s);
+const sizes=s.map(p=>k*0.5+k*1.6*(p.Deq_mm-dLo)/(dHi-dLo+1e-9));
+const t={type:'scatter3d',mode:'markers',x:s.map(p=>p.x_mm),y:s.map(p=>p.y_mm),z:s.map(p=>p.z_mm),marker:{size:sizes,color:s.map(p=>p[key]),colorscale:'Plasma',opacity:.85,colorbar:{title:key,thickness:12,len:.6}},
+text:s.map(p=>`D = ${p.Deq_mm.toFixed(3)} mm<br>sphericity ${p.sphericity.toFixed(2)}<br>frame ${p.frame}`),hovertemplate:'%{text}<br>x=%{x:.1f} y=%{y:.1f} z=%{z:.1f} mm<extra></extra>'};
+const ax=(t)=>({title:t,gridcolor:css('--gl'),color:css('--mut')});
+Plotly.react('plot',[t],{...thm(),margin:{l:0,r:0,t:6,b:0},scene:{xaxis:ax('x (mm)'),yaxis:ax('y (mm)'),zaxis:{...ax('z depth (mm)'),range:[40,60]},aspectmode:'manual',aspectratio:{x:1,y:1.3,z:.35},camera:cam},uirevision:1},{responsive:true,displaylogo:false});
+const h={type:'histogram',x:s.map(p=>p.Deq_mm),nbinsx:40,marker:{color:css('--acc2')}};
+Plotly.react('hist',[h],{...thm(),margin:{l:50,r:10,t:30,b:45},title:{text:'Equivalent diameter, current selection',font:{size:13}},xaxis:{title:'Deq (mm)',gridcolor:css('--gl')},yaxis:{title:'count',gridcolor:css('--gl')}},{responsive:true,displaylogo:false})}
+let cam={eye:{x:1.5,y:-1.6,z:1}};
+window.setView=v=>{cam=v==='top'?{eye:{x:0,y:0,z:2.6},up:{x:0,y:1,z:0}}:v==='side'?{eye:{x:0,y:-2.6,z:.2}}:{eye:{x:1.5,y:-1.6,z:1}};render()};
+function bins(){const b=[331,1867,706,205,72,35,18,9,1,2],lab=b.map((_,i)=>'bin '+(i+1));
+Plotly.react('bins',[{type:'bar',x:lab,y:b,marker:{color:b.map((_,i)=>i>=6&&i<=8?css('--warn'):css('--acc2'))},text:b,textposition:'outside'}],{...thm(),margin:{l:50,r:10,t:30,b:40},title:{text:'Accepted pool by diameter bin (Table 6.1); amber = analysed band',font:{size:13}},yaxis:{gridcolor:css('--gl')}},{responsive:true,displaylogo:false})}
+['dMin','dMax','fMin','fMax','colorBy','msz'].forEach(id=>$(id).addEventListener('input',render));
+$('reset').onclick=()=>{[['dMin',dLo],['dMax',dHi],['fMin',fMinV],['fMax',fMaxV]].forEach(([i,v])=>$(i).value=v);render()};
+let timer=null;$('play').onclick=()=>{if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ Play frames';return}
+$('play').textContent='❚❚ Pause';let f=fMinV;timer=setInterval(()=>{$('fMin').value=f;$('fMax').value=f;render();f=f>=fMaxV?fMinV:f+1},600)};
+$('csv').onclick=()=>{const s=sel(),h=Object.keys(DATA[0]);const t=[h.join(',')].concat(s.map(p=>h.map(k=>p[k]).join(','))).join('\n');
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='droplets_selection.csv';a.click()};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);addEventListener('themechange',function(){setTimeout(render,50)});
+render();
+})();
+</script></body></html>

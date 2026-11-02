@@ -1,0 +1,139 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Computational holography console · Imran Khan</title>
+<style>/*__CSS__*/
+.main{width:100%}.pane{max-width:1180px;margin:auto;width:100%}header.top{padding:22px 24px 6px;max-width:1180px;margin:auto;width:100%}
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+canvas.v{width:100%;image-rendering:pixelated;border-radius:10px;border:1px solid var(--line);background:#000}.cap{font-size:12px;color:var(--mut);margin:4px 0 0}
+.ctl{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-bottom:10px}.ctl>div{min-width:170px;flex:1}.ctl button{width:auto;padding:9px 16px;background:linear-gradient(90deg,var(--acc2),var(--acc));color:#fff;border:0;font-weight:700}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--mut);margin-right:5px}
+td code,li code{background:var(--card);padding:1px 6px;border-radius:6px;font-size:12px}
+</style></head><body>
+<header class="top"><h1 style="font-size:26px">Computational holography console</h1><div class="sub">Imran Khan · B.Tech Optics &amp; Optoelectronics, University of Calcutta · CSIR-CSIO internship under Dr. Raj Kumar (Scientist, Optical Holography, CSIR; Professor, AcSIR)</div>
+<div class="hero"><span class="chip a"><b>1</b> Digital holography: what happened</span><span class="chip b"><b>2</b> Computational methods: what we can do</span><span class="chip c"><b>3</b> Use cases and novelty</span></div></header>
+<div class="main"><div class="tabs" id="tabs"></div>
+
+<div class="pane on" id="p0"><h2>1 · Digital holography: what happened</h2>
+<p>Holography records both the amplitude and the phase of light by interfering the object wave with a reference wave. A computer can then <b>refocus the picture after recording</b>. I did two projects with this idea at CSIR-CSIO. The first project was liquid mixing and the second was a spray of droplets.</p>
+<div class="three"><div class="card"><h3>Project 1 · Liquid mixing (first)</h3><p>Water + isopropanol (IPA) in a 10 mm cuvette, 532 nm, Photron high-speed camera. I wrote a Fresnel reconstruction in Python (replacing a MATLAB workflow), tested it on a disc, then reconstructed frames at z = 45 mm, subtracted a reference and logged fringe metrics.</p><span class="tag">amplitude</span><span class="tag">phase subtraction</span><span class="tag">120 frames processed</span></div>
+<div class="card"><h3>Project 2 · Spray droplets (second)</h3><p>Off-axis Mach–Zehnder recording of a spray. Angular spectrum depth scan (50–600 mm), adaptive thresholding, focus metric, persistence filter, tracking, and statistics with bootstrap intervals: 3,246 droplets kept from 4,910 candidates; D32 = 4.52 mm for the coarse band.</p><span class="tag">3D position</span><span class="tag">D32</span><span class="tag">tracking</span></div>
+<div class="card"><h3>What I learned</h3><ul><li>Reconstruction is only as good as the sampling: single-FFT Fresnel at 45 mm with 20 µm pixels is under-sampled.</li><li>My spray script is inline while the recording is off-axis, so phase was not recovered.</li><li>Depth scan landed on the scan edge: a measurement artefact.</li></ul></div></div>
+<h2 style="margin-top:18px">Optical setups</h2><div class="g"><div>__SETUP_MIX__<p class="hint">Project 1: cuvette in the object arm.</p></div><div>__SETUP_SPR__<p class="hint">Project 2: spray in the object arm.</p></div></div>
+<div class="g" style="margin-top:14px"><div><img class="f" src="__IMG_FFT__" alt="FFT diagnostics"><p class="hint">Project 1: reference and disturbed spectrum, amplitude, phase (from my presentation).</p></div><div><img class="f" src="__IMG_DYN__" alt="Interference dynamics"><p class="hint">Project 1: fringe metrics over frames. Check the visibility definition before presenting (values above 1).</p></div><div><img class="f" src="__IMG_SIX__" alt="Six-panel summary"><p class="hint">Project 2: six diagnostic panels (Fig. 6.3 of the spray report).</p></div></div></div>
+
+<div class="pane" id="p1"><h2>2 · Computational methods: what we can do</h2>
+<p>The Computational Light Laboratory’s toolkit, <b>Odak</b> (<code>github.com/kaanaksit/odak</code>, MPL-2.0), is a PyTorch library for optics, computer graphics and visual perception. Its holography code propagates complex fields and optimises phase-only holograms with differentiable methods. Below, each method is paired with what it does and how I can use it.</p>
+<table><tr><th>Method</th><th>In Odak or the lab’s papers</th><th>What it does</th><th>How I can use it</th></tr>
+<tr><td>Angular spectrum, band-limited</td><td><code>odak.learn.wave.angular_spectrum</code>, <code>band_limited_angular_spectrum</code></td><td>Propagates a complex field without the paraxial limit</td><td>Cross-check my Fresnel result at z = 45 mm</td></tr>
+<tr><td>Fresnel (transfer function and TR)</td><td>propagation types <code>Transfer Function Fresnel</code>, <code>TR Fresnel</code></td><td>Faster paraxial propagation</td><td>Compare with my single-FFT code; check sampling</td></tr>
+<tr><td>Gerchberg–Saxton</td><td><code>odak.learn.wave.gerchberg_saxton</code></td><td>Iterative phase retrieval for a phase-only hologram</td><td>Baseline hologram generator; live demo below</td></tr>
+<tr><td>Stochastic gradient descent</td><td><code>odak.learn.wave.stochastic_gradient_descent</code> (default: band-limited angular spectrum)</td><td>Optimises the phase through a differentiable model</td><td>Higher-quality holograms; live demo below</td></tr>
+<tr><td>Learned light transport</td><td>Kavaklı, Urey, Akşit, Appl. Opt. 61(5), B50 (2022)</td><td>Learns the mismatch between simulated and captured display output</td><td>Use my real recordings to measure the sim-to-real gap</td></tr>
+<tr><td>Complex-valued Gaussians</td><td>Zhan et al., ACM TOG 2026 (SIGGRAPH 2026); Zhan et al., ECCV 2026</td><td>Compact complex-field representations for holograms and radiance fields</td><td>Represent large hologram sequences compactly</td></tr>
+<tr><td>Hologram compression</td><td>Fan et al., Eurographics 2026 poster; Peng et al., SIGGRAPH 2025 poster</td><td>Compress phase-only and double-phase holograms</td><td>My 7,000-frame sequences are heavy: storage is a real issue</td></tr>
+<tr><td>Multi-plane and multi-colour</td><td>Realistic defocus blur (IEEE VR 2023); Multi-color holograms (SIGGRAPH Asia 2023); AutoColor</td><td>Better depth cues and brightness</td><td>Relate to my depth stack and focus metric</td></tr>
+<tr><td>Diffractive optical processing</td><td>All-optical image denoising, Light Sci. Appl. 2024</td><td>Computes with light, no per-frame electronics</td><td>Idea for speckle and noise suppression</td></tr>
+<tr><td>Speckle sensing</td><td>SpecTrack (SIGGRAPH Asia 2024 poster); SensiCut (UIST 2021)</td><td>Uses speckle as a signal instead of noise</td><td>Reinterpret the speckle in my holograms</td></tr></table>
+<h2>Computational workflow</h2>__PIPE_COMP__<h2 style="margin-top:16px">Odak calls for a first experiment</h2>__PIPE_ODAK__
+<p class="hint">Function names are from the Odak documentation (kaanaksit.github.io/odak). Check argument names in the current version before running.</p></div>
+
+<div class="pane" id="p2"><h2>3 · Use cases and the major novelty</h2>
+<table><tr><th>Capability</th><th>Where it is used</th><th>Basis</th></tr>
+<tr><td>Phase-only hologram generation (GS, SGD)</td><td>Holographic AR and 3D displays, systems neuroscience, optical trapping</td><td>Applications listed in recent CGH literature (arXiv 2505.00220)</td></tr>
+<tr><td>SGD hologram optimisation</td><td>Highest image quality among CGH algorithms compared in Neural Holography</td><td>Peng, Choi, Padmanaban, Wetzstein 2020</td></tr>
+<tr><td>Digital holographic microscopy</td><td>3D morphology of cells; a low-cost DHM developed at IIT Delhi was commercialised</td><td>Press reports on Khare and Joseph</td></tr>
+<tr><td>Spray metrology by holography</td><td>Fuel injection, spray coating, agriculture (my reports); pharmaceutical development as a possible research use</td><td>Reports; regulators use laser diffraction for routine droplet sizing</td></tr>
+<tr><td>Phase imaging of mixing</td><td>Concentration fields in microfluidics and process engineering</td><td>Gladstone–Dale relation; my Project 1</td></tr>
+<tr><td>Hologram compression</td><td>Storage and transmission of holographic video</td><td>Lab posters 2025–2026</td></tr></table>
+<div class="warn good"><b>Major novelty, stated honestly.</b> These are contributions to discuss, not published novelty.<ol><li><b>Licence-free, end-to-end Python pipeline</b> for hologram sequences that combines depth scanning, persistence filtering, tracking and bootstrap confidence intervals, with quality logging built in.</li><li><b>Self-auditing results.</b> I cross-checked code against output and reported the problems (inline vs off-axis, scan-edge depth, inconsistent number density) instead of hiding them.</li><li><b>Sampling and Nyquist analysis for mixing holograms:</b> a calculator showing when single-FFT Fresnel is under-sampled and when fringes exceed the camera limit.</li><li><b>A bridge to differentiable holography:</b> my measured recordings can serve as a physical test set for learned and optimised reconstruction.</li></ol></div></div>
+
+<div class="pane" id="p3"><h2>4 · Live demos (computed in your browser)</h2><p class="hint">Everything below is computed here with a small FFT, not pre-rendered. Parameters are for demonstration.</p>
+<div class="card"><h3>Demo A · Phase-only hologram: Gerchberg–Saxton vs gradient descent</h3>
+<div class="ctl"><div><label>Propagation distance z (mm): <b id="zv">10</b></label><input type="range" id="gz" min="5" max="30" value="10"></div><div><label>Iterations: <b id="itv">60</b></label><input type="range" id="git" min="10" max="150" value="60" step="10"></div><div><label>Adam learning rate: <b id="lrv">0.40</b></label><input type="range" id="lr" min="0.02" max="0.6" step="0.02" value="0.4"></div><div><button id="run">Run both methods</button></div></div>
+<div class="three"><div><canvas class="v" id="cT" width="128" height="128"></canvas><div class="cap">Target</div></div><div><canvas class="v" id="cG" width="128" height="128"></canvas><div class="cap" id="tG">GS reconstruction</div></div><div><canvas class="v" id="cS" width="128" height="128"></canvas><div class="cap" id="tS">Gradient descent reconstruction</div></div></div>
+<canvas id="cE" width="700" height="170" style="width:100%;margin-top:10px;border:1px solid var(--line);border-radius:10px"></canvas><div class="hint">Amplitude error per iteration: GS (cyan) and gradient descent with Adam (pink). In this toy single-plane example the two methods reach similar quality at a suitable learning rate (lower rates are slower). The published advantage of gradient-based methods comes with richer losses, multiple planes and camera-in-the-loop training; this demo does not show that.</div></div>
+<div class="card"><h3>Demo B · Off-axis phase recovery (Takeda): the fix for my spray script</h3>
+<div class="ctl"><div><label>Carrier frequency f₀ (cycles/pixel): <b id="f0v">0.25</b></label><input type="range" id="f0" min="0.03" max="0.45" step="0.01" value="0.25"></div><div><label>Noise: <b id="nzv">0.10</b></label><input type="range" id="nz" min="0" max="0.6" step="0.02" value="0.1"></div></div>
+<div class="three" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))"><div><canvas class="v" id="tH" width="128" height="128"></canvas><div class="cap">Hologram</div></div><div><canvas class="v" id="tF" width="128" height="128"></canvas><div class="cap">Spectrum with filter (circle)</div></div><div><canvas class="v" id="tR" width="128" height="128"></canvas><div class="cap">Recovered phase</div></div><div><canvas class="v" id="tT" width="128" height="128"></canvas><div class="cap">True phase</div></div></div>
+<p>RMS phase error: <b id="tE"></b> rad. <span id="tN" class="hint"></span></p></div></div>
+
+<div class="pane" id="p4"><h2>5 · How I apply these methods to my console, report and presentation</h2>
+<table><tr><th>Addition</th><th>Where</th><th>Concrete step</th></tr>
+<tr><td>Cross-check propagation with Odak</td><td>Report ch. 5–6, console</td><td>Run <code>band_limited_angular_spectrum</code> on one frame and compare with my result</td></tr>
+<tr><td>Fix the sampling statement</td><td>Report §2.3, slide 4</td><td>Replace “satisfied for the geometries used” with the NΔx²/λ check</td></tr>
+<tr><td>Takeda sideband step</td><td>Spray pipeline, report future work</td><td>Demo B shows the principle; port it to the real off-axis frames</td></tr>
+<tr><td>Hologram optimisation demo</td><td>Presentation slide 5</td><td>Show Demo A as a short live example of computational holography</td></tr>
+<tr><td>Quality metrics</td><td>Console and report</td><td>Report PSNR and amplitude error for reconstructions, as the lab’s papers do</td></tr>
+<tr><td>Hologram compression idea</td><td>Future work</td><td>Test 2D-Gaussian representations on my frame sequences</td></tr>
+<tr><td>Cite correctly</td><td>All</td><td>Use the references tab; confirm each item on the publisher page</td></tr></table></div>
+
+<div class="pane" id="p5"><h2>6 · Diagrams</h2><h3 style="margin:8px 0">Project 1 · liquid mixing</h3>__SETUP_MIX2__<h3 style="margin:14px 0 8px">Project 1 pipeline</h3>__PIPE_MIX__<h3 style="margin:14px 0 8px">Project 2 · spray</h3>__SETUP_SPR2__<h3 style="margin:14px 0 8px">Project 2 pipeline</h3>__PIPE_SPR__<p class="hint">Corrections to the report figure: “Objective beam” is now OBJECT beam; the line labelled “VSB” is the synchronisation (sync) line.</p></div>
+
+<div class="pane" id="p6"><h2>7 · Researchers and groups, and why I included them</h2><p>I did not only follow one laboratory. These are researchers in India and abroad whose work covers the parts of my pipeline: recording, numerical reconstruction, sprays and particles, phase imaging, and computational or learned holography. Each card says what the work is and why it is here.</p>__PEOPLE__</div>
+<div class="pane" id="p7"><h2>8 · References, with the reason each is included</h2>__REFS__<p class="hint">Toolkit: <a href="https://github.com/kaanaksit/odak" target="_blank" rel="noopener">github.com/kaanaksit/odak</a> (MPL-2.0), documentation <a href="https://kaanaksit.com/odak/" target="_blank" rel="noopener">kaanaksit.com/odak</a>. Laboratory pages: <a href="https://complightlab.com/publications/" target="_blank" rel="noopener">publications</a>, <a href="https://complightlab.com/documentation/" target="_blank" rel="noopener">documentation</a>.</p></div>
+</div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+['1 · Digital holography','2 · Computational methods','3 · Use cases & novelty','4 · Live demos','5 · Apply to my work','6 · Diagrams','7 · Researchers & why','8 · References'].forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.className=i?'':'on';b.onclick=()=>{[...$('tabs').children].forEach((x,j)=>x.className=j===i?'on':'');for(let j=0;j<8;j++)$('p'+j).className='pane'+(j===i?' on':'');if(i===3){drawTarget();takeda()}};$('tabs').appendChild(b)});
+// ---------- FFT
+function fft1(re,im,inv){const n=re.length;for(let i=1,j=0;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t}}
+for(let len=2;len<=n;len<<=1){const a=(inv?2:-2)*Math.PI/len,wr=Math.cos(a),wi=Math.sin(a);for(let i=0;i<n;i+=len){let cr=1,ci=0;for(let k=0;k<len/2;k++){const u=i+k,v=i+k+len/2,xr=re[v]*cr-im[v]*ci,xi=re[v]*ci+im[v]*cr;re[v]=re[u]-xr;im[v]=im[u]-xi;re[u]+=xr;im[u]+=xi;const t=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=t}}}
+if(inv)for(let i=0;i<n;i++){re[i]/=n;im[i]/=n}}
+const N=128,NN=N*N;
+function fft2(re,im,inv){const r=new Float64Array(N),m=new Float64Array(N);for(let y=0;y<N;y++){for(let x=0;x<N;x++){r[x]=re[y*N+x];m[x]=im[y*N+x]}fft1(r,m,inv);for(let x=0;x<N;x++){re[y*N+x]=r[x];im[y*N+x]=m[x]}}
+for(let x=0;x<N;x++){for(let y=0;y<N;y++){r[y]=re[y*N+x];m[y]=im[y*N+x]}fft1(r,m,inv);for(let y=0;y<N;y++){re[y*N+x]=r[y];im[y*N+x]=m[y]}}}
+// ---------- ASM kernel
+const lam=532e-9,dx=8e-6;
+function kernel(z){const Hr=new Float64Array(NN),Hi=new Float64Array(NN),du=1/(N*dx),lim=1/(lam*Math.sqrt(Math.pow(2*du*z,2)+1));
+for(let y=0;y<N;y++)for(let x=0;x<N;x++){const fx=(x<N/2?x:x-N)*du,fy=(y<N/2?y:y-N)*du,a=1-(lam*fx)**2-(lam*fy)**2,i=y*N+x;if(a>0&&Math.abs(fx)<=lim&&Math.abs(fy)<=lim){const ph=2*Math.PI/lam*z*Math.sqrt(a);Hr[i]=Math.cos(ph);Hi[i]=Math.sin(ph)}}return[Hr,Hi]}
+function prop(ur,ui,H,adj){const re=Float64Array.from(ur),im=Float64Array.from(ui);fft2(re,im,false);for(let i=0;i<NN;i++){const hr=H[0][i],hi=adj?-H[1][i]:H[1][i],a=re[i]*hr-im[i]*hi,b=re[i]*hi+im[i]*hr;re[i]=a;im[i]=b}fft2(re,im,true);return[re,im]}
+// ---------- target
+function target(){const c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,N,N);g.strokeStyle='#fff';g.lineWidth=7;g.beginPath();g.arc(64,64,34,0,7);g.stroke();g.fillStyle='#fff';g.fillRect(30,60,68,8);g.beginPath();g.arc(64,64,9,0,7);g.fill();g.fillRect(58,20,12,16);
+const d=g.getImageData(0,0,N,N).data,t=new Float64Array(NN);let s=0;for(let i=0;i<NN;i++){t[i]=d[4*i]/255;s+=t[i]*t[i]}const k=Math.sqrt(NN/s);for(let i=0;i<NN;i++)t[i]*=k;return t}
+const T=target();
+function show(id,a,max){const cv=$(id),g=cv.getContext('2d'),im=g.createImageData(N,N);for(let i=0;i<NN;i++){const v=Math.max(0,Math.min(255,255*a[i]/max));im.data[4*i]=v;im.data[4*i+1]=v;im.data[4*i+2]=v;im.data[4*i+3]=255}g.putImageData(im,0,0)}
+function drawTarget(){let m=0;for(let i=0;i<NN;i++)m=Math.max(m,T[i]);show('cT',T,m)}
+const psnr=(a,t)=>{let m=0,mx=0;for(let i=0;i<NN;i++){m+=(a[i]-t[i])**2;mx=Math.max(mx,t[i])}m/=NN;return 10*Math.log10(mx*mx/m)};
+function seedPhase(){let s=12345;const p=new Float64Array(NN);for(let i=0;i<NN;i++){s=(s*1103515245+12345)&0x7fffffff;p[i]=2*Math.PI*s/0x7fffffff}return p}
+function run(){const z=+$('gz').value*1e-3,its=+$('git').value,H=kernel(z);$('zv').textContent=(z*1e3).toFixed(0);$('itv').textContent=its;
+const eG=[],eS=[];let ph=seedPhase(),ampG=null;
+// Gerchberg-Saxton
+for(let it=0;it<its;it++){const ur=new Float64Array(NN),ui=new Float64Array(NN);for(let i=0;i<NN;i++){ur[i]=Math.cos(ph[i]);ui[i]=Math.sin(ph[i])}
+const[vr,vi]=prop(ur,ui,H,false);const a=new Float64Array(NN);let e=0;for(let i=0;i<NN;i++){a[i]=Math.hypot(vr[i],vi[i]);e+=(a[i]-T[i])**2}eG.push(Math.sqrt(e/NN));ampG=a;
+const wr=new Float64Array(NN),wi=new Float64Array(NN);for(let i=0;i<NN;i++){const m=a[i]||1e-9;wr[i]=T[i]*vr[i]/m;wi[i]=T[i]*vi[i]/m}const[br,bi]=prop(wr,wi,H,true);for(let i=0;i<NN;i++)ph[i]=Math.atan2(bi[i],br[i])}
+// Gradient descent with Adam
+let p2=seedPhase(),m1=new Float64Array(NN),m2=new Float64Array(NN),ampS=null;const lr=+$('lr').value,b1=.9,b2=.999;
+for(let it=0;it<its;it++){const ur=new Float64Array(NN),ui=new Float64Array(NN);for(let i=0;i<NN;i++){ur[i]=Math.cos(p2[i]);ui[i]=Math.sin(p2[i])}
+const[vr,vi]=prop(ur,ui,H,false);const a=new Float64Array(NN),gr=new Float64Array(NN),gi=new Float64Array(NN);let e=0;
+for(let i=0;i<NN;i++){a[i]=Math.hypot(vr[i],vi[i]);const r=a[i]-T[i];e+=r*r;const m=a[i]||1e-9;gr[i]=r*vr[i]/m;gi[i]=r*vi[i]/m}eS.push(Math.sqrt(e/NN));ampS=a;
+const[hr,hi]=prop(gr,gi,H,true);for(let i=0;i<NN;i++){// dL/dphi = -2 Im(u * conj(h)) with u=ur+i ui, h=hr+i hi
+const dphi=-2*(ui[i]*hr[i]-ur[i]*hi[i]);m1[i]=b1*m1[i]+(1-b1)*dphi;m2[i]=b2*m2[i]+(1-b2)*dphi*dphi;const mh=m1[i]/(1-Math.pow(b1,it+1)),vh=m2[i]/(1-Math.pow(b2,it+1));p2[i]-=lr*mh/(Math.sqrt(vh)+1e-8)}}
+let mx=0;for(let i=0;i<NN;i++)mx=Math.max(mx,T[i]);show('cG',ampG,mx);show('cS',ampS,mx);
+$('tG').textContent='GS reconstruction · PSNR '+psnr(ampG,T).toFixed(1)+' dB';$('tS').textContent='Gradient descent · PSNR '+psnr(ampS,T).toFixed(1)+' dB';
+const c=$('cE'),g=c.getContext('2d');g.clearRect(0,0,700,170);const mxE=Math.max(...eG,...eS);g.strokeStyle='rgba(150,170,255,.35)';g.strokeRect(30,10,660,140);
+[[eG,'#22d3ee'],[eS,'#f472b6']].forEach(([e,col])=>{g.strokeStyle=col;g.lineWidth=2;g.beginPath();e.forEach((v,i)=>{const x=30+660*i/Math.max(1,e.length-1),y=150-140*v/mxE;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()});
+g.fillStyle='#9fb0d8';g.font='11px Arial';g.fillText('error '+mxE.toFixed(2)+' at start',34,22);g.fillText('iterations',330,166)}
+$('lr').oninput=()=>$('lrv').textContent=(+$('lr').value).toFixed(2);$('run').onclick=run;$('gz').oninput=()=>$('zv').textContent=$('gz').value;$('git').oninput=()=>$('itv').textContent=$('git').value;
+// ---------- Takeda
+function takeda(){const f0=+$('f0').value,nz=+$('nz').value;$('f0v').textContent=f0.toFixed(2);$('nzv').textContent=nz.toFixed(2);
+const ph0=new Float64Array(NN),I=new Float64Array(NN);let s=777;const rnd=()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff};
+for(let y=0;y<N;y++)for(let x=0;x<N;x++){const r2=(x-64)**2+(y-64)**2,i=y*N+x;ph0[i]=2.2*Math.exp(-r2/(2*18*18))+0.8*Math.exp(-((x-40)**2+(y-88)**2)/(2*10*10));I[i]=2+2*Math.cos(2*Math.PI*f0*x+ph0[i])+nz*2*(rnd()-.5)}
+let mn=1e9,mxv=-1e9;const re=Float64Array.from(I),im=new Float64Array(NN);fft2(re,im,false);
+const spec=new Float64Array(NN);let sm=0;for(let i=0;i<NN;i++){spec[i]=Math.log(1+Math.hypot(re[i],im[i]));sm=Math.max(sm,spec[i])}
+const R=Math.min(f0*0.55,0.2),fr=new Float64Array(NN),fi=new Float64Array(NN);
+for(let y=0;y<N;y++)for(let x=0;x<N;x++){const fx=(x<N/2?x:x-N)/N,fy=(y<N/2?y:y-N)/N,i=y*N+x;if((fx-f0)**2+fy*fy<=R*R){fr[i]=re[i];fi[i]=im[i]}}
+fft2(fr,fi,true);const rec=new Float64Array(NN);let e=0;
+for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x,a=-2*Math.PI*f0*x,cr=fr[i]*Math.cos(a)-fi[i]*Math.sin(a),ci=fr[i]*Math.sin(a)+fi[i]*Math.cos(a);rec[i]=Math.atan2(ci,cr)}
+// remove constant offset (global phase)
+let ox=0,oy=0;for(let i=0;i<NN;i++){const d=rec[i]-ph0[i];ox+=Math.cos(d);oy+=Math.sin(d)}const off=Math.atan2(oy,ox);
+for(let i=0;i<NN;i++){let d=rec[i]-off-ph0[i];d=Math.atan2(Math.sin(d),Math.cos(d));e+=d*d}const rms=Math.sqrt(e/NN);
+show('tH',I,4);
+const cv=$('tF'),g=cv.getContext('2d'),imd=g.createImageData(N,N);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const sx=(x+N/2)%N,sy=(y+N/2)%N,v=255*spec[sy*N+sx]/sm,i=y*N+x;imd.data[4*i]=v;imd.data[4*i+1]=v;imd.data[4*i+2]=v;imd.data[4*i+3]=255}g.putImageData(imd,0,0);
+g.strokeStyle='#f472b6';g.lineWidth=1.5;g.beginPath();g.arc(N/2+f0*N,N/2,R*N,0,7);g.stroke();
+const wrap=a=>a.map?a:a;const rw=new Float64Array(NN);for(let i=0;i<NN;i++)rw[i]=((rec[i]-off+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);const tw=new Float64Array(NN);for(let i=0;i<NN;i++)tw[i]=((ph0[i]+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+show('tR',rw,2*Math.PI);show('tT',tw,2*Math.PI);$('tE').textContent=rms.toFixed(3);
+$('tN').textContent=f0<0.1?'Low carrier: the +1 lobe overlaps the DC term, so the recovery fails. This is why off-axis geometry needs a large enough tilt.':f0>0.38?'High carrier: close to the Nyquist limit (0.5 cycles/pixel); fringes become hard to resolve.':'The +1 lobe is cleanly separated from the DC term and the twin image.'}
+$('f0').oninput=takeda;$('nz').oninput=takeda;
+drawTarget();takeda();
+})();
+</script></body></html>

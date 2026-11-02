@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+<title id="title">HOLOVEX symbol</title><desc id="desc">A geometric H monogram crossed by luminous optical wavefronts.</desc>
+<defs>
+ <linearGradient id="g" x1="20" y1="20" x2="230" y2="230" gradientUnits="userSpaceOnUse"><stop stop-color="#00C8F0"/><stop offset=".55" stop-color="#8065E8"/><stop offset="1" stop-color="#E9F0F8"/></linearGradient>
+ <radialGradient id="core"><stop stop-color="#fff"/><stop offset=".22" stop-color="#00C8F0"/><stop offset="1" stop-color="#00C8F0" stop-opacity="0"/></radialGradient>
+ <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect x="9" y="9" width="238" height="238" rx="54" fill="#071629" stroke="#21445f" stroke-width="2"/>
+<path d="M70 58V198M70 128H186M186 58V198" fill="none" stroke="url(#g)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="none" stroke="url(#g)" stroke-width="2.4" opacity=".88">
+ <path d="M30 128c25-37 48-56 74-56s49 19 74 56 48 56 74 56"/>
+ <path d="M30 128c25-23 48-35 74-35s49 12 74 35 48 35 74 35" opacity=".7"/>
+ <path d="M30 128c25 23 48 35 74 35s49-12 74-35 48-35 74-35" opacity=".7"/>
+ <path d="M30 128c25 37 48 56 74 56s49-19 74-56 48-56 74-56" opacity=".5"/>
+</g>
+<circle cx="128" cy="128" r="24" fill="url(#core)" filter="url(#glow)"/>
+<circle cx="128" cy="128" r="4.5" fill="#fff"/>
+</svg>

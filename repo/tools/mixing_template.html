@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Liquid mixing holography console · Project 1 (first project)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>/*__CSS__*/
+#c3{flex:1;min-width:300px;height:min(68vh,620px);background:radial-gradient(700px 400px at 30% 20%,rgba(139,92,246,.35),transparent 60%),radial-gradient(600px 400px at 90% 90%,rgba(34,211,238,.25),transparent 60%),#070c24;border-radius:16px;cursor:grab;display:block;width:100%;border:1px solid var(--line);box-shadow:var(--shadow)}
+.view{display:flex;gap:16px;flex-wrap:wrap}.hm{width:240px}.hm canvas{width:240px;height:288px;border-radius:12px;border:1px solid var(--line);display:block;box-shadow:var(--shadow)}
+.leg{height:10px;border-radius:6px;background:linear-gradient(90deg,#3b82f6,#22d3ee,#34d399,#fbbf24,#f472b6);margin:6px 0 2px}
+</style></head><body><div class="wrap">
+<div class="side"><h1>Liquid mixing console</h1><div class="sub">First project · water + isopropanol (IPA), top injection · 10 mm cuvette · 532 nm · Photron FASTCAM SA-Z · CSIR-CSIO</div>
+<div class="warn"><b>Illustrative model.</b> The 3D field is a simple diffusion simulation I wrote to explain the physics. It is not measured data. My measured images and metrics are in the “My results” tab.</div>
+<div class="card"><h3>Time and model</h3><label>Time after injection</label><div class="row"><span>0 s</span><b id="tv" style="color:var(--fg)">0.0 s</b><span>7 s</span></div><input type="range" id="t" min="0" max="7" step="0.05" value="0">
+<div class="two"><button id="play">▶ Play</button><button id="rst">Reset</button></div>
+<label>Mixing model</label><select id="mode"><option value="eff">Effective mixing (convection-enhanced)</option><option value="mol">Molecular diffusion only (D = 0.9×10⁻⁹ m²/s)</option></select>
+<label>Effective diffusivity (m²/s)</label><div class="row"><span>10⁻⁸</span><b id="dv" style="color:var(--fg)"></b><span>10⁻⁶</span></div><input type="range" id="D" min="-8" max="-6" step="0.05" value="-6.2">
+<label>Marangoni spreading in top layer (×)</label><div class="row"><span>1</span><b id="mv" style="color:var(--fg)"></b><span>20</span></div><input type="range" id="M" min="1" max="20" step="1" value="3">
+<label>Initial drop penetration (mm below surface)</label><div class="row"><span>0</span><b id="pv" style="color:var(--fg)"></b><span>5</span></div><input type="range" id="P" min="0" max="5" step="0.25" value="2">
+<label>Display threshold (volume fraction)</label><input type="range" id="thr" min="0.01" max="0.5" step="0.01" value="0.06"></div>
+<div class="card"><h3>Readouts</h3><div class="sg" id="ro"></div></div></div>
+<div class="main"><div class="tabs" id="tabs"></div>
+<div class="pane on" id="p0"><div class="hero"><span class="chip a"><b>Δn</b> = 0.044</span><span class="chip b"><b>827</b> fringes across the full contrast</span><span class="chip c"><b>20 µm</b> pixels → 25 fringes/mm limit</span></div>
+<div class="view"><canvas id="c3"></canvas><div class="hm"><h3 style="margin:0 0 6px;font-size:12px;color:var(--mut);letter-spacing:.06em">WHAT THE CAMERA SEES · fringe count, x–z</h3><canvas id="hm" width="20" height="24"></canvas><div class="leg"></div><div class="row"><span>0</span><span>max</span></div><div class="hint" id="hmn" style="margin-top:8px"></div></div></div>
+<p class="hint">Drag to rotate. Spheres show IPA volume fraction above the threshold, coloured blue → pink with increasing concentration. The right panel integrates the field along the beam: Δφ/2π = Δn ∫C dy / λ.</p></div>
+<div class="pane" id="p1"><h2>What happened, in plain words</h2><ol class="story">
+<li><b>Learned the method.</b> Holography stores the light’s phase as fringes, so a computer can refocus the picture later.</li>
+<li><b>Rebuilt the lab code in Python.</b> I replaced a MATLAB workflow with a Fresnel reconstruction I wrote myself, and tested it on a disc.</li>
+<li><b>Recorded the mixing.</b> Three drops of IPA were injected into a water cuvette inside an interferometer and filmed with a high-speed camera.</li>
+<li><b>Reconstructed the frames.</b> Each frame is turned into a picture at z = 45 mm. I subtract a reference frame so only the mixing disturbance remains.</li>
+<li><b>Measured it.</b> For each frame the script reports fringe visibility, RMS fluctuation and SNR, and saves frames, a video and a CSV.</li></ol>
+<h2>Optical setup</h2>__SETUP__<p class="hint">Diagram redrawn for this console. Corrections to the report figure: “Objective beam” is now OBJECT beam, and the camera line labelled “VSB” is the synchronisation (sync) line.</p>
+<h2>Processing pipeline</h2>__PIPE__</div>
+<div class="pane" id="p2"><h2>My results (from my presentation)</h2>
+<div class="g"><div><img class="f" src="__IMG_FFT__" alt="Reference and disturbed FFT, amplitude and phase"><p class="hint">Step 1 diagnostic at d = 110 mm: reference (top) and disturbed (bottom) spectrum, amplitude and phase map.</p></div>
+<div><img class="f" src="__IMG_PS__" alt="Phase subtraction frame 1"><p class="hint">Phase subtraction, frame 1, d = 45 mm. The title shows visibility 3.800, RMS 8.73, SNR 0.0 dB.</p></div></div>
+<div class="g" style="margin-top:16px"><div><img class="f" src="__IMG_DYN__" alt="Interference dynamics over the frame sequence"><p class="hint">Fringe visibility (blue) and RMS fluctuation (red) over the frame sequence, with centre-line cross-sections for frame 135.</p></div>
+<div><img class="f" src="__IMG_CSV__" alt="Metrics CSV"><p class="hint">interference_analysis_metrics.csv: one row per frame.</p><img class="f" src="__IMG_FILES__" alt="Output files" style="margin-top:12px"><p class="hint">Outputs: reconstructed PNG frames, MP4, CSV and diagnostic plot.</p></div></div>
+<div class="g" style="margin-top:16px"><div><img class="f" src="__RAW__" alt="Raw hologram"><p class="hint">Raw hologram of the cuvette during mixing (Fig. 6.2, report).</p></div><div><img class="f" src="__REC__" alt="Reconstructed amplitude"><p class="hint">Fresnel amplitude at z = 45 mm (Fig. 6.3, report).</p></div></div>
+<div class="warn" style="margin-top:16px"><b>Check before presenting.</b> (1) The “fringe visibility” values are 2.2–3.8, but ordinary fringe visibility V = (Imax − Imin)/(Imax + Imin) cannot exceed 1, so say what your formula is. (2) SNR in the CSV falls to about −23 dB, so state how SNR is defined. (3) The saved frames are named frames(698–4105), about 3,400 frames, while the report says about 7,000. (4) The script processed 120 frames. Be ready to say which numbers refer to which subset.</div></div>
+<div class="pane" id="p3"><h2>Camera workflow (Photron PFV)</h2><div class="g">
+<div><img class="f" src="__IMG_CFG__" alt="Camera configuration steps" style="max-height:420px"><p class="hint"><b>1 · Connect.</b> Configuration → Connection: choose the camera network settings.</p></div>
+<div><img class="f" src="__IMG_SET__" alt="Shooting conditions panel"><p class="hint"><b>2 · Set conditions.</b> Frame rate, shutter speed, resolution (1024 × 1024), trigger mode. This panel is from the Photron manual; check what I used.</p></div>
+<div><img class="f" src="__IMG_REC2__" alt="Ready and recording"><p class="hint"><b>3 · Record.</b> Press Ready, then trigger: the camera shows “Now recording”.</p></div></div>
+<p><b>4 · Save.</b> Export the frames as an image sequence, then run the Python script. The script lists five libraries: numpy (FFT), matplotlib (figures), scikit-image (image I/O), scipy (Gaussian filter) and tkinter (file picker).</p></div>
+<div class="pane" id="p4"><h2>Physics and calculators</h2>
+<div class="eq">Δn = λ Δφ / (2π d)  →  one fringe: Δn = λ / d</div><div class="eq">∂C/∂t = D ∇²C       diffusion length ≈ √(2 D t)</div><div class="eq">Fresnel: h = exp[−iπ Δx² (kₓ² + k_y²) / (λ z)],   Nyquist fringe density = 1/(2Δx)</div>
+<div class="card"><h3>Calculator 1: refractive-index sensitivity</h3>λ (nm) <input type="number" id="a1" value="532"> d (mm) <input type="number" id="a2" value="10"> → Δn per fringe = <b id="a3"></b>; fringes across Δn = 0.044: <b id="a4"></b></div>
+<div class="card"><h3>Calculator 2: how far can molecular diffusion go?</h3>D (m²/s) <input type="number" id="b1" value="0.9e-9" step="any"> t (s) <input type="number" id="b2" value="7"> → √(2Dt) = <b id="b3"></b> mm</div>
+<div class="card"><h3>Calculator 3: sampling checks</h3>N (px) <input type="number" id="c1" value="1024"> Δx (µm) <input type="number" id="c2" value="20"> z (mm) <input type="number" id="c3z" value="45"><br>Minimum z for the single-FFT chirp = <b id="c4"></b> mm → <b id="c5"></b><br>Reconstructed pixel λz/(NΔx) = <b id="c6"></b> µm; window = <b id="c7"></b> mm<br>Camera Nyquist fringe density = <b id="c8"></b> fringes/mm</div>
+<div class="warn"><b>Why diffusion alone cannot explain the plumes.</b> With D = 0.9×10⁻⁹ m²/s the diffusion length after 7 s is about 0.11 mm, but the plumes are millimetres wide. Also, IPA is lighter than water, so IPA-rich fluid tends to stay on top. Downward plumes need drop momentum, surface-tension-driven (Marangoni) flow or convective instability. The model’s “effective” diffusivity and drop-penetration sliders stand in for these; they are knobs, not measurements.</div></div>
+<div class="pane" id="p5"><h2>References</h2><ul><li>Goodman, J. W. (2005). <i>Introduction to Fourier Optics</i>, 3rd ed. Roberts &amp; Company.</li><li>Hariharan, P. (2002). <i>Basics of Holography</i>. Cambridge University Press.</li><li>Schnars, U., Falldorf, C., Watson, J., Jüptner, W. (2015). <i>Digital Holography and Wavefront Sensing</i>, 2nd ed. Springer.</li><li>Kumar, M., Pensia, L., Kumar, R., Matoba, O. (2025). Vibration measurement of 3-D objects with single-shot double field-of-view high-speed digital holography. <i>IEEE Trans. Instrum. Meas.</i> 74, 5012510.</li><li>Takeda, M., Ina, H., Kobayashi, S. (1982). <i>J. Opt. Soc. Am.</i> 72, 156–160.</li>
+<li>Samsheerali, P. T., Khare, K., Joseph, J. (2014). Quantitative phase imaging with single shot digital holography. <i>Opt. Commun.</i> 319, 85–89 (IIT Delhi).</li><li>Samsheerali, P. T., Khare, K., Joseph, J. (2015). Three-dimensional display system using near on-axis, phase-only digital holography. <i>Appl. Opt.</i> 54(3), 451–457 (IIT Delhi).</li></ul><p class="hint">Details are copied from the internship report and public author listings. Please confirm volume and page numbers against the publishers before citing.</p></div>
+</div></div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+['3D mixing','What happened','My results','Camera workflow','Physics & calculators','References'].forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.className=i?'':'on';b.onclick=()=>{[...$('tabs').children].forEach((x,j)=>x.className=j===i?'on':'');for(let j=0;j<6;j++)$('p'+j).className='pane'+(j===i?' on':'');if(i===0)size()};$('tabs').appendChild(b)});
+const NX=20,NY=20,NZ=24,L=10,H=12,dx=L/NX,dz=H/NZ,N=NX*NY*NZ,lam=532e-9,dn=0.044;
+let C=new Float32Array(N),C2=new Float32Array(N),tNow=0,M0=0;const id=(i,j,k)=>i+NX*(j+NY*k);
+function init(){C.fill(0);const pen=+$('P').value;[[3.0,4.5],[5.2,5.6],[7.2,4.8]].forEach(([cx,cy])=>{const cz=H-pen-1.0;for(let k=0;k<NZ;k++)for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const x=(i+.5)*dx,y=(j+.5)*dx,z=(k+.5)*dz;if((x-cx)**2+(y-cy)**2+(z-cz)**2<1.2**2||(z>H-0.9&&(x-cx)**2+(y-cy)**2<1.5**2))C[id(i,j,k)]=1}});tNow=0;M0=0}
+const Dm=()=>$('mode').value==='mol'?0.9e-9*1e6:Math.pow(10,+$('D').value)*1e6,Mf=()=>$('mode').value==='mol'?1:+$('M').value;
+function step(dt){const D=Dm(),M=Mf();for(let k=0;k<NZ;k++)for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const p=id(i,j,k),c=C[p],Dl=D*(k>=NZ-2?M:1);
+const xm=C[id(i>0?i-1:i,j,k)],xp=C[id(i<NX-1?i+1:i,j,k)],ym=C[id(i,j>0?j-1:j,k)],yp=C[id(i,j<NY-1?j+1:j,k)],zm=C[id(i,j,k>0?k-1:k)],zp=C[id(i,j,k<NZ-1?k+1:k)];
+C2[p]=c+dt/(dx*dx)*(Dl*(xm+xp+ym+yp-4*c)+D*(zm+zp-2*c))}const t=C;C=C2;C2=t}
+function advance(to){if(to<tNow)init();const D=Dm()*Math.max(1,Mf()),dt=0.9*dx*dx/(6*D),n=Math.ceil((to-tNow)/dt);if(n>0){const h=(to-tNow)/n;for(let s=0;s<n;s++)step(h)}tNow=to}
+const cv=$('c3'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});R.setClearColor(0x000000,0);
+const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(40,1,.1,500),G=new THREE.Group();S.add(G);
+S.add(new THREE.AmbientLight(0x8899ff,.55));const l1=new THREE.PointLight(0x22d3ee,1.3,80),l2=new THREE.PointLight(0xf472b6,1.1,80),l3=new THREE.PointLight(0xffffff,.7,90);l1.position.set(14,10,14);l2.position.set(-14,-4,10);l3.position.set(0,16,-12);S.add(l1,l2,l3);
+G.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(L,H,L)),new THREE.LineBasicMaterial({color:0x7c8cff})));
+const lvl=new THREE.Mesh(new THREE.PlaneGeometry(L,L),new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:.13,side:2}));lvl.rotation.x=Math.PI/2;lvl.position.y=H/2-0.2;G.add(lvl);
+const grid=new THREE.GridHelper(L,10,0x4a5cc8,0x2b3a8a);grid.position.y=-H/2;G.add(grid);
+const beam=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,L+7,10),new THREE.MeshBasicMaterial({color:0x34d399,transparent:true,opacity:.6}));beam.rotation.x=Math.PI/2;G.add(beam);
+const NB=8,bins=[];for(let b=0;b<NB;b++){const a=Math.pow((b+.5)/NB,2),c=new THREE.Color().setHSL(.62-.55*a,.85,.5+.1*a);
+const m=new THREE.InstancedMesh(new THREE.SphereGeometry(1,12,9),new THREE.MeshPhongMaterial({color:c,emissive:c.clone().multiplyScalar(.35),shininess:70,transparent:true,opacity:.86}),N);m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);G.add(m);bins.push(m)}
+G.rotation.set(.45,-.6,0);
+const col=new THREE.Color(),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),pos=new THREE.Vector3(),scl=new THREE.Vector3();
+function ramp(v){const a=Math.min(1,v);col.setHSL(.62-.55*a,.85,.5+.1*a);return col}
+function paint(){const thr=+$('thr').value,cnt=new Array(NB).fill(0);let shown=0;for(let k=0;k<NZ;k++)for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const v=C[id(i,j,k)];if(v<thr)continue;shown++;
+const b=Math.min(NB-1,Math.floor(Math.sqrt(Math.min(1,v))*NB)),s=.1+.34*Math.sqrt(Math.min(1,v));pos.set((i+.5)*dx-L/2,(k+.5)*dz-H/2,(j+.5)*dx-L/2);scl.set(s,s,s);m4.compose(pos,q,scl);bins[b].setMatrixAt(cnt[b]++,m4)}
+bins.forEach((m,b)=>{m.count=cnt[b];m.instanceMatrix.needsUpdate=true});return shown}
+const hx=$('hm').getContext('2d');
+function fringes(){const F=new Float32Array(NX*NZ);for(let k=0;k<NZ;k++)for(let i=0;i<NX;i++){let s=0;for(let j=0;j<NY;j++)s+=C[id(i,j,k)];F[i+NX*k]=dn*s*dx*1e-3/lam}return F}
+function readouts(shown){let mass=0,cmax=0;for(let p=0;p<N;p++){mass+=C[p];if(C[p]>cmax)cmax=C[p]}if(M0===0)M0=mass;
+const F=fringes();let fm=0,g=0;for(let k=0;k<NZ;k++)for(let i=0;i<NX;i++){const f=F[i+NX*k];if(f>fm)fm=f;if(i<NX-1)g=Math.max(g,Math.abs(F[i+1+NX*k]-f)/dx);if(k<NZ-1)g=Math.max(g,Math.abs(F[i+NX*(k+1)]-f)/dz)}
+const im=hx.createImageData(NX,NZ);for(let k=0;k<NZ;k++)for(let i=0;i<NX;i++){const f=fm>0?F[i+NX*k]/fm:0,r=ramp(f),o=4*(i+NX*(NZ-1-k));im.data[o]=r.r*255;im.data[o+1]=r.g*255;im.data[o+2]=r.b*255;im.data[o+3]=255}hx.putImageData(im,0,0);
+const nyq=25,bad=g>nyq;
+$('ro').innerHTML=[['Time',tNow.toFixed(2)+' s'],['Max IPA fraction',cmax.toFixed(3)],['Mass conservation',((mass/M0-1)*100).toExponential(1)+' %'],['Max fringe count',fm.toFixed(0)],['Max fringe gradient',g.toFixed(0)+' /mm'],['Camera Nyquist',nyq+' /mm'],['Cells shown',shown]].map(r=>`<div class="k">${r[0]}</div><div class="v">${r[1]}</div>`).join('');
+$('hmn').innerHTML=bad?'<span class="bad">Fringe gradient exceeds the camera Nyquist limit: fringes would be unresolved, so clean phase maps are not expected.</span>':'<span class="ok">Fringe gradient is within the camera Nyquist limit.</span>'}
+function update(){$('tv').textContent=(+$('t').value).toFixed(1)+' s';$('dv').textContent=(Dm()*1e-6).toExponential(1);$('mv').textContent='×'+Mf();$('pv').textContent=(+$('P').value).toFixed(2)+' mm';advance(+$('t').value);readouts(paint())}
+['t','D','M','P','thr','mode'].forEach(i=>$(i).addEventListener('input',()=>{if(i!=='t'&&i!=='thr')init();update()}));
+$('rst').onclick=()=>{$('t').value=0;init();update()};
+let tm=null;$('play').onclick=()=>{if(tm){clearInterval(tm);tm=null;$('play').textContent='▶ Play';return}$('play').textContent='❚❚ Pause';tm=setInterval(()=>{let v=+$('t').value+.1;if(v>7)v=0;$('t').value=v;update()},80)};
+function size(){const w=cv.clientWidth,h=cv.clientHeight||500;R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(w,h,false);cam.aspect=w/h;cam.position.set(0,2,30);cam.lookAt(0,0,0);cam.updateProjectionMatrix()}
+addEventListener('resize',size);let dn_=false,lx=0,ly=0;cv.addEventListener('pointerdown',e=>{dn_=true;lx=e.clientX;ly=e.clientY});addEventListener('pointerup',()=>dn_=false);
+addEventListener('pointermove',e=>{if(!dn_)return;G.rotation.y+=(e.clientX-lx)*.01;G.rotation.x=Math.max(-1.3,Math.min(1.3,G.rotation.x+(e.clientY-ly)*.01));lx=e.clientX;ly=e.clientY});
+let ph=0;(function loop(){requestAnimationFrame(loop);ph+=.01;l1.position.x=14*Math.cos(ph);l1.position.z=14*Math.sin(ph);R.render(S,cam)})();
+const g=i=>parseFloat($(i).value);
+function calc(){const a=g('a1')*1e-9/(g('a2')*1e-3);$('a3').textContent=a.toExponential(2);$('a4').textContent=(0.044/a).toFixed(0);$('b3').textContent=(Math.sqrt(2*g('b1')*g('b2'))*1e3).toFixed(3);
+const l=g('a1')*1e-9,Nn=g('c1'),px=g('c2')*1e-6,z=g('c3z')*1e-3,zm=Nn*px*px/l,ok=z>=zm,e=$('c5');$('c4').textContent=(zm*1e3).toFixed(0);e.textContent=ok?'adequately sampled':'under-sampled: use band-limited angular spectrum';e.className=ok?'ok':'bad';
+$('c6').textContent=(l*z/(Nn*px)*1e6).toFixed(2);$('c7').textContent=(l*z/px*1e3).toFixed(2);$('c8').textContent=(1/(2*px*1e3)).toFixed(0)}
+['a1','a2','b1','b2','c1','c2','c3z'].forEach(i=>$(i).addEventListener('input',calc));
+init();size();update();calc();
+})();
+</script></body></html>

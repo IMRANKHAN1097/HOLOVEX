@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Internship and research experience · Imran Khan</title>
+<style>/*__CSS__*/
+.main{width:100%}.pane{max-width:1180px;margin:auto;width:100%;display:block;padding:18px 20px}
+.herobox{display:flex;gap:22px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.herobox::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,var(--acc2),transparent 65%);opacity:.35}
+.avatar{width:92px;height:92px;border-radius:50%;background:linear-gradient(135deg,var(--acc2),var(--acc),var(--acc3));display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:800;color:#fff;box-shadow:0 8px 24px rgba(139,92,246,.4);flex:none}
+.herobox h1{font-size:30px}.badge{display:inline-block;padding:4px 12px;border-radius:999px;background:linear-gradient(90deg,var(--acc2),var(--acc));color:#fff;font-size:12px;font-weight:700;margin-right:6px}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+h2.sec{font-size:18px;margin:22px 0 10px}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;border:1px solid var(--acc3);font-size:11px;color:var(--acc3)}
+</style></head><body><div class="main">
+<div class="pane">
+<div class="herobox"><div class="avatar" id="av">IK</div><div style="flex:1;min-width:260px;position:relative;z-index:1"><span class="badge" id="stat">Status</span><h1 id="nm">Imran Khan</h1><div id="hl" style="font-size:15px;color:var(--mut);margin:4px 0 10px"></div>
+<div class="chips"><span>B.Tech Optics &amp; Optoelectronics Engineering</span><span>University of Calcutta</span><span>CGPA 8.26 / 10</span><span>Secretary, OSI Student Chapter</span></div></div>
+<div style="position:relative;z-index:1"><button id="edit" style="width:auto;padding:8px 16px">✎ Edit profile</button></div></div>
+<div class="card" id="editor" style="display:none;margin-top:12px"><h3>Edit profile (saved only in this browser)</h3><div class="two2"><div><label>Name</label><input class="ed" id="i1"></div><div><label>Status</label><input class="ed" id="i2"></div></div><label>Headline</label><textarea class="ed" id="i3" rows="2"></textarea><label>Research interests (comma separated)</label><input class="ed" id="i4"><div class="two"><button id="sv">Save</button><button id="rs">Reset to default</button></div></div>
+
+<h2 class="sec">Internship</h2>
+<div class="two2"><div class="card"><h3>Where</h3><p><b>CSIR – Central Scientific Instruments Organisation (CSIO), Chandigarh</b><br>Optics &amp; Photonics Instrumentation Division · Research intern, summer 2026</p><h3 style="margin-top:12px">Supervisor</h3><p><b>Dr. Raj Kumar</b><br>Scientist, Optical Holography, CSIR<br>Professor, AcSIR (Physics, Optics &amp; Photonics), CSIR-CSIO, Chandigarh</p></div>
+<div class="card"><h3>What I delivered</h3><ul><li>A licence-free Python replacement for a MATLAB Fresnel reconstruction workflow.</li><li>An end-to-end spray-droplet pipeline with tracking and bootstrap statistics.</li><li>Two internship reports, an interactive set of consoles and this open repository.</li></ul></div></div>
+<div class="kpi"><div><b>2</b><span>holography projects</span></div><div><b>532 nm</b><span>laser, Mach–Zehnder</span></div><div><b>3,246</b><span>droplets measured</span></div><div><b>~7,000</b><span>frames of mixing recorded</span></div><div><b>1,343</b><span>lines in the spray pipeline</span></div></div>
+
+<h2 class="sec">Research experience, in order</h2>
+<div class="timeline">
+<div class="ev"><div class="when">PROJECT 1 · FIRST</div><h3>Liquid mixing: water + isopropanol</h3><p>Wrote a Fresnel reconstruction from scratch, validated it on a disc, recorded the mixing in a transmission Mach–Zehnder setup and reconstructed frames with phase subtraction and fringe metrics.</p><div class="chips"><span>Fresnel transfer function</span><span>DC removal</span><span>phase subtraction</span><span>Gaussian smoothing</span><span>batch processing</span></div></div>
+<div class="ev"><div class="when">PROJECT 2 · SECOND</div><h3>Spray droplets in 3D</h3><p>Angular-spectrum depth scan, adaptive thresholding, focus metric, persistence filtering, tracking and statistics with bootstrap intervals. I also documented what was wrong in my own pipeline.</p><div class="chips"><span>angular spectrum</span><span>Tenengrad focus</span><span>Otsu / local threshold</span><span>k-d tree tracking</span><span>Rosin–Rammler</span><span>bootstrap</span></div></div>
+<div class="ev"><div class="when">THEN</div><h3>Computational holography study</h3><p>Read the Odak toolkit and the Computational Light Laboratory publications, and built live demos of Gerchberg–Saxton, gradient-descent hologram optimisation and Takeda phase recovery.</p><div class="chips"><span class="pl">Gerchberg–Saxton</span><span class="pl">gradient descent</span><span class="pl">Takeda demodulation</span><span class="pl">PyTorch / Odak (next)</span></div></div>
+<div class="ev"><div class="when">ONGOING</div><h3>Other projects</h3><p>Optical lens design and image-quality analysis in Zemax OpticStudio; AI-based laser beam profiling in Python and OpenCV.</p></div></div>
+
+<h2 class="sec">Methods I use in this repository</h2>
+<div class="two2"><div class="card"><h3>Used so far (solid)</h3><div class="chips"><span>Fresnel single-FFT</span><span>angular spectrum (band-limited)</span><span>FFT / IFFT</span><span>Tukey apodisation</span><span>depth scanning</span><span>Tenengrad focus</span><span>adaptive thresholding</span><span>persistence filter</span><span>nearest-neighbour tracking</span><span>D32, CV, Dv50</span><span>Rosin–Rammler fit</span><span>log-normal fit</span><span>bootstrap CI</span></div></div>
+<div class="card"><h3>Learning and next (dashed)</h3><div class="chips"><span class="pl">Takeda sideband demodulation</span><span class="pl">phase unwrapping</span><span class="pl">Gerchberg–Saxton</span><span class="pl">gradient-descent CGH</span><span class="pl">Odak (PyTorch)</span><span class="pl">multi-frame tracking</span><span class="pl">hologram compression</span></div></div></div>
+
+<h2 class="sec">Skills</h2>
+<div class="two2"><div class="card"><h3>Programming and libraries</h3><div class="chips"><span>Python</span><span>C</span><span>MATLAB</span><span>NumPy</span><span>SciPy</span><span>Pandas</span><span>OpenCV</span><span>scikit-image</span><span>Matplotlib</span><span>TensorFlow</span><span>Jupyter</span></div></div>
+<div class="card"><h3>Optics and tools</h3><div class="chips"><span>Zemax OpticStudio</span><span>Lumerical</span><span>Speos</span><span>interferometry</span><span>laser alignment</span><span>beam characterisation</span><span>digital holography</span></div></div></div>
+<h2 class="sec">Other</h2>
+<div class="card"><ul><li>Secretary, Optical Society of India (OSI) University of Calcutta Students’ Chapter: workshops, seminars and technical events.</li><li>Workshops: Photonic Integrated Circuit design (Keysight and University of Calcutta), photonics software (Zemax, Lumerical, Speos), thin-film fabrication (IIT Kharagpur).</li><li>Courses: Oracle Generative AI and AI Foundations; C-DAC quantum computing programme; MathWorks and OpenCV training.</li></ul></div>
+<p class="hint" style="margin-top:14px">Contact details, roll number and internship ID are left out on purpose, so this page can be public.</p>
+</div></div>
+<script>
+(function(){
+var D={name:'Imran Khan',status:'Seeking research internships in computational holography',head:'Optics student who turns wave-optical physics into working Python pipelines for holographic measurement.',ints:'Fourier optics, diffraction, computational holography, optical information processing, AI-assisted optics'},K='hl-profile',$=function(i){return document.getElementById(i)},P=Object.assign({},D);
+try{var s=JSON.parse(localStorage.getItem(K)||'null');if(s)P=Object.assign(P,s)}catch(e){}
+function draw(){$('nm').textContent=P.name;$('stat').textContent=P.status;$('hl').innerHTML=P.head+'<br><small>Interests: '+P.ints.replace(/</g,'&lt;')+'</small>';$('av').textContent=P.name.split(/\s+/).map(function(w){return w[0]}).join('').slice(0,2).toUpperCase()}
+$('edit').onclick=function(){var e=$('editor');e.style.display=e.style.display==='none'?'block':'none';$('i1').value=P.name;$('i2').value=P.status;$('i3').value=P.head;$('i4').value=P.ints};
+$('sv').onclick=function(){P={name:$('i1').value||D.name,status:$('i2').value||D.status,head:$('i3').value||D.head,ints:$('i4').value||D.ints};try{localStorage.setItem(K,JSON.stringify(P))}catch(e){}draw()};
+$('rs').onclick=function(){P=Object.assign({},D);try{localStorage.removeItem(K)}catch(e){}draw()};
+draw();})();
+</script></body></html>
