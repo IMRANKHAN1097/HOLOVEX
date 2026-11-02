@@ -35,15 +35,53 @@ for f in ['spray_console.html','mixing_console.html','computational_console.html
 sp, mx, cc, pf = rd('spray_console.html'), rd('mixing_console.html'), rd('computational_console.html'), rd('internship_console.html')
 q = lambda s: html.escape(s, quote=True)
 index_css = css
-index_html = '''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>HoloLab · Digital holography consoles · Imran Khan</title>
+index_html = '''<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="icon" type="image/svg+xml" href="assets/holovex-logo.svg">
+<meta name="theme-color" content="#071629">
+<title>HOLOVEX — Research &amp; Innovation Lab</title>
 <style>/*__CSS__*/
 body{display:flex;flex-direction:column;height:100vh}
 nav{display:flex;gap:8px;align-items:center;padding:10px 120px 10px 14px;background:var(--panel);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);flex-wrap:wrap}
-nav b{margin-right:10px;background:linear-gradient(90deg,var(--acc),var(--acc3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hvx-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  margin-right: 15px;
+}
+
+.hvx-brand img {
+  width: 46px;
+  height: 46px;
+  filter: drop-shadow(0 0 12px #00c8f0);
+}
+
+.hvx-brand span {
+  display: flex;
+  flex-direction: column;
+}
+
+.hvx-brand strong {
+  color: var(--fg);
+  font-size: 21px;
+  letter-spacing: 4px;
+}
+
+.hvx-brand small {
+  color: var(--mut);
+  font-size: 9px;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
 nav button{width:auto;margin:0;border-radius:999px;padding:8px 16px}
 nav button.on{background:linear-gradient(90deg,var(--acc2),var(--acc));color:#fff;border-color:transparent;font-weight:700}
 iframe{flex:1;border:0;width:100%;background:transparent}</style></head>
-<body><nav><b>HoloLab · Digital holography consoles</b><button id="b0" class="on">Internship &amp; research</button><button id="b1">Project 1 · Liquid mixing</button><button id="b2">Project 2 · Spray droplets</button><button id="b3">Computational holography</button></nav>
+<body><nav><a class="hvx-brand" href="index.html">
+  <img src="assets/holovex-logo.svg" alt="HOLOVEX Logo">
+  <span>
+    <strong>HOLOVEX</strong>
+    <small>RESEARCH &amp; INNOVATION LAB</small>
+  </span>
+</a><button id="b0" class="on">Internship &amp; research</button><button id="b1">Project 1 · Liquid mixing</button><button id="b2">Project 2 · Spray droplets</button><button id="b3">Computational holography</button></nav>
 <iframe id="f0" srcdoc="__F0__"></iframe><iframe id="f1" srcdoc="__F1__" style="display:none"></iframe><iframe id="f2" srcdoc="__F2__" style="display:none"></iframe><iframe id="f3" srcdoc="__F3__" style="display:none"></iframe>
 <script>[0,1,2,3].forEach(function(i){document.getElementById('b'+i).onclick=function(){[0,1,2,3].forEach(function(j){document.getElementById('f'+j).style.display=i===j?'block':'none';document.getElementById('b'+j).className=i===j?'on':''});window.dispatchEvent(new Event('resize'))}})</script>
 __THEME__</body></html>'''
